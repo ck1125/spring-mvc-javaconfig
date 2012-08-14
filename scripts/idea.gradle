@@ -1,0 +1,50 @@
+idea.project.ipr {
+    withXml { provider ->
+        def libraryTable = provider.node.component.orderEntry.find {it.@type == 'libraryTable'}
+        def compileDependencies = getCompileDependencies()
+        compileDependencies.each { dependency ->
+
+            def inXml = libraryTable?.find { it.library.@name == "${dependency.name}"}
+            if (!inXml) {
+                if (!libraryTable) {
+                    libraryTable = provider.node.appendNode('component', [name: 'libraryTable'])
+                }
+                def newLibrary = libraryTable.appendNode('library', [name: "${dependency.name}"])
+                def classNode = newLibrary.appendNode('CLASSES')
+                classNode.appendNode('root', [url: "jar:///${dependency.file}!/"])
+                newLibrary.appendNode('JAVADOC')
+                newLibrary.appendNode('SOURCES')
+            }
+
+            provider.node.component.find { it.@name == 'ProjectRootManager' }.@languageLevel = 'JDK_1_6'
+            provider.node.component.find { it.@name == 'ProjectRootManager' }.@'project-jdk-name' = '1.6'
+            provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = "Git"
+
+        }
+    }
+}
+
+
+idea.module.iml {
+    withXml { provider ->
+        def component = provider.node.component.find {it.@name == "NewModuleRootManager" }
+
+        def compileDependencies = getCompileDependencies()
+        compileDependencies.each { dependency ->
+
+            def inXml = component.orderEntry?.find { it.@name == "${dependency.name}"}
+            if (!inXml) {
+                orderEntry = component.appendNode('orderEntry', [type: 'library', name: "${dependency.name}", level: "project"])
+            }
+
+
+        }
+        def content = component.find {it.name() == 'content'}
+        if (content) {
+            content.appendNode('sourceFolder',[url:"file://\$MODULE_DIR\$/src/main/groovy",isTestSource:"false"])
+            content.appendNode('sourceFolder',[url:"file://\$MODULE_DIR\$/src/test/groovy",isTestSource:"true"])
+            content.appendNode('sourceFolder',[url:'file://\$MODULE_DIR\$/src/functionalTest/groovy',isTestSource:"true"])
+        }
+
+    }
+}
