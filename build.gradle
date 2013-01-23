@@ -3,6 +3,10 @@ buildscript {
         mavenLocal()
         mavenCentral()
     }
+
+    dependencies {
+        classpath group:"com.in3k8.gradle.plugins", name: "apiary-springmvc-stub", version:"0.1-SNAPSHOT"
+    }
 }
 
 
@@ -13,6 +17,7 @@ apply plugin: "groovy"
 apply plugin: "maven"
 apply plugin: "war"
 apply plugin: "jetty"
+apply plugin: "apiary-springmvc-stub"
 
 apply from: 'scripts/idea.gradle'
 
@@ -46,7 +51,8 @@ dependencies {
 			'org.springframework:spring-webmvc:3.1.0.RELEASE',
 			'org.codehaus.jackson:jackson-mapper-asl:1.9.0',
             'cglib:cglib-nodep:2.2'
-			
+    compile "org.springframework:spring-test:3.1.0.RELEASE"
+
     testCompile "org.springframework:spring-test:3.1.0.RELEASE",
             "org.springframework:spring-core:3.1.0.RELEASE"
 
@@ -63,6 +69,8 @@ private def getCompileDependencies() {
     return depList
 }
 
+
+'apiary-spring'  {configLocation ='com.in3k8.javaconfig.config.AppConfig'}
 
 
 
